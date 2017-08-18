@@ -24,7 +24,7 @@ function createScene(){
   fieldOfView = 60;
   nearPlane = 1;
   farPlane = 10000;
-  camera = new THREE.PrespectiveCamera (
+  camera = new THREE.PerspectiveCamera (
     fieldOfView,
     aspectRatio,
     nearPlane,
@@ -35,10 +35,7 @@ camera.position.x = 0;
 camera.position.z = 200;
 camera.position.y = 100;
 //create renderer
-renderer = new THREE.WebGLRenderer({
-  alpha: true,
-  antialias: true
-});
+renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 renderer.setSize(WIDTH, HEIGHT);
 renderer.shadowMap.enabled = true;
 container = document.getElementById('world');//add the DOM element of the renderer to the container in html
@@ -58,25 +55,18 @@ function handleWindowResize() {   //update on resize
 function createLights(){
   hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9);
   shadowLight = new THREE.DirectionalLight(0xffffff, .9);
-  //the direction of the light  
-  shadowLight.position.set(150, 350, 350);
-  //shadows casting 
-  shadowLight.castShadow = true;
-  // define the visible area of the projected shadow
-  shadowLight.shadow.camera.left = -400;
+  shadowLight.position.set(150, 350, 350);  //the direction of the light  
+  shadowLight.castShadow = true;  //shadows casting 
+  shadowLight.shadow.camera.left = -400;   // define the visible area of the projected shadow
   shadowLight.shadow.camera.right = 400;
   shadowLight.shadow.camera.top = 400;
   shadowLight.shadow.camera.bottom = -400;
   shadowLight.shadow.camera.near = 1;
   shadowLight.shadow.camera.far = 1000;
-
-  // define the resolution of the shadow; the higher the better, 
-  // but also the more expensive and less performant
-  shadowLight.shadow.mapSize.width = 2048;
-  shadowLight.shadow.mapSize.height = 2048;
+  shadowLight.shadow.mapSize.width = 2048;    // define the resolution of the shadow; the higher the better, 
+  shadowLight.shadow.mapSize.height = 2048;    // but also the more expensive and less performant
   
-  // add lights to the scene to activate
-  scene.add(hemisphereLight);  
+  scene.add(hemisphereLight);    // add lights to the scene to activate
   scene.add(shadowLight);
 }
 
@@ -100,19 +90,17 @@ earth = new Earth();
 earth.mesh.position.y = -600;
 scene.add(earth.mesh);
 }
-renderer.render(scene, camera);
-function init(){
-  //set up the scene
-  createScene();
-
-  createLights();
-
-//add objects
-  createPlane();
-  createEarth();
-  createSky();
-
-  loop();
-
-  window.addEventListener('load', init, false);
+function loop(){
+  earth.mesh.rotation.z += .005;
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
 }
+function init(){
+  createScene();//set up the scene
+  createLights();
+  // createPlane();//add objects
+  createEarth();
+  // createSky();
+  loop();
+}
+window.addEventListener('load', init, false);
