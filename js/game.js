@@ -70,20 +70,70 @@ function createLights(){
   scene.add(hemisphereLight);    // add lights to the scene to activate
   scene.add(shadowLight);
 }
+//***** CREATE FIDEL *******
+var fidel = function(){
+  this.mesh = new THREE.Object3D();
+  //body
+  var geomBody = new THREE.BoxGeometry(80, 40, 40, 1, 1, 1);
+  var matBody = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
+  var body = new THREE.Mesh(geomBody, matBody);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  this.mesh.add(body);
+  //  tail
+  var geomTail = new THREE.BoxGeometry(20,20,20,1,1,1);
+  var matTail = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
+  var tail = new THREE.Mesh(geomTail, matTail);
+  tail.position.set(-45,0,0);
+  tail.castShadow = true;
+  tail.receiveShadow = true;
+  this.mesh.add(tail);
+  //paws
+  var geomPaw = new THREE.BoxGeometry(10,10,150,1,1,1);
+  var matPaw = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
+  var paw = new THREE.Mesh(geomPaw, matPaw);
+  paw.position.set(20,0,0);
+  paw.castShadow = true;
+  paw.receiveShadow = true;
+  this.mesh.add(paw);
+
+  //head
+  var geomHead = new THREE.BoxGeometry(40, 35, 35, 1, 1, 1);
+  var matHead = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
+  var head = new THREE.Mesh(geomHead, matHead);
+  head.position.set(55,10,0);
+  head.castShadow = true;
+  head.receiveShadow = true;
+  this.mesh.add(head);
+  //ear
+  var geomEar = new THREE.BoxGeometry(40,12,12,1,1,1);
+  var matEar = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
+  var ear = new THREE.Mesh(geomEar, matEar);
+  ear.position.set(90,20,0);
+  ear.castShadow = true;
+  ear.receiveShadow = true;
+  this.mesh.add(ear);
+}
+
+var fidelO;
+
+function createFidel(){ 
+  fidelO = new fidel();
+  fidelO.mesh.scale.set(.25,.25,.25);
+  fidelO.mesh.position.y = 100;
+  scene.add(fidelO.mesh);
+}
 
 //***** CREATE CLOUDS *******
 
 Cloud = function(){
-  // Create an empty container that will hold the different parts of the cloud
-  this.mesh = new THREE.Object3D();
+  this.mesh = new THREE.Object3D();  // Create an empty container that will hold the different parts of the cloud
   var geom = new THREE.SphereGeometry( 20, 20, 20 );
-  
   var mat = new THREE.MeshPhongMaterial({
     color:Colors.white,  
   });
   
-  // duplicate the geometry a random number of times
-  var nBlocs = 3+Math.floor(Math.random()*3);
+  var nBlocs = 3+Math.floor(Math.random()*3);   // duplicate the geometry a random number of times
   for (var i=0; i<nBlocs; i++ ){
     
     var m = new THREE.Mesh(geom, mat);     // create the mesh by cloning the geometry
@@ -145,6 +195,7 @@ Earth = function(){
   this.mesh = new THREE.Mesh(geom,mat);  //mesh combination of geometry and material
   this.mesh.recieveShadow = true;
 }
+
 var earth;
 function createEarth(){
 earth = new Earth();
@@ -161,7 +212,7 @@ function loop(){
 function init(){
   createScene();//set up the scene
   createLights();
-  // createPlane();//add objects
+  createFidel();//add objects
   createEarth();
   createSky();
   loop();
