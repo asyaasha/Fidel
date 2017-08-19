@@ -77,14 +77,22 @@ var fidel = function(){
   var geomBody = new THREE.BoxGeometry(80, 40, 40, 1, 1, 1);
   var matBody = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
   var body = new THREE.Mesh(geomBody, matBody);
+  geomBody.vertices[4].y-=5;
+  geomBody.vertices[4].z+=5;
+  geomBody.vertices[5].y-=5;
+  geomBody.vertices[5].z-=5;
+  geomBody.vertices[6].y+=10;
+  geomBody.vertices[6].z+=5;
+  geomBody.vertices[7].y+=10;
+  geomBody.vertices[7].z-=5;
   body.castShadow = true;
   body.receiveShadow = true;
   this.mesh.add(body);
   //  tail
-  var geomTail = new THREE.BoxGeometry(20,20,20,1,1,1);
+  var geomTail = new THREE.BoxGeometry(10,10,10,1,1,1);
   var matTail = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
   var tail = new THREE.Mesh(geomTail, matTail);
-  tail.position.set(-45,0,0);
+  tail.position.set(-30,18,0);
   tail.castShadow = true;
   tail.receiveShadow = true;
   this.mesh.add(tail);
@@ -92,7 +100,7 @@ var fidel = function(){
   var geomPaw = new THREE.BoxGeometry(10,10,150,1,1,1);
   var matPaw = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
   var paw = new THREE.Mesh(geomPaw, matPaw);
-  paw.position.set(20,0,0);
+  paw.position.set(25,10,0);
   paw.castShadow = true;
   paw.receiveShadow = true;
   this.mesh.add(paw);
@@ -105,14 +113,26 @@ var fidel = function(){
   head.castShadow = true;
   head.receiveShadow = true;
   this.mesh.add(head);
-  //ear
+  //ear1
   var geomEar = new THREE.BoxGeometry(40,12,12,1,1,1);
   var matEar = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
   var ear = new THREE.Mesh(geomEar, matEar);
-  ear.position.set(90,20,0);
+  ear.position.set(90,20,-10);
+  ear.rotation.y = -50;
+  ear.rotation.x = -50;
   ear.castShadow = true;
   ear.receiveShadow = true;
   this.mesh.add(ear);
+  //ear2
+  var geomEar2 = new THREE.BoxGeometry(40,12,12,1,1,1);
+  var matEar2 = new THREE.MeshPhongMaterial({color:Colors.blue, shading:THREE.FlatShading});
+  var ear2 = new THREE.Mesh(geomEar2, matEar2);
+  ear2.position.set(90,20,10);
+  ear2.rotation.y = 50;
+  ear2.rotation.x = 50;
+  ear2.castShadow = true;
+  ear2.receiveShadow = true;
+  this.mesh.add(ear2);
 }
 
 var fidelO;
@@ -128,9 +148,12 @@ function createFidel(){
 
 Cloud = function(){
   this.mesh = new THREE.Object3D();  // Create an empty container that will hold the different parts of the cloud
-  var geom = new THREE.SphereGeometry( 20, 20, 20 );
+  var geom = new THREE.SphereGeometry( 20, 4, 4 );
   var mat = new THREE.MeshPhongMaterial({
     color:Colors.white,  
+    transparent:true,
+    opacity:.6,
+    shading:THREE.FlatShading,
   });
   
   var nBlocs = 3+Math.floor(Math.random()*3);   // duplicate the geometry a random number of times
@@ -186,28 +209,103 @@ Earth = function(){
   var geom = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
   geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2)); //rotate on x axis
 
+  geom.mergeVertices();
+  var l = geom.vertices.length;
+  this.waves = [];
+  for (var i=0; i<l; i++){
+    // get each vertex
+    var v = geom.vertices[i];
+
+    // store some data associated to it
+    this.waves.push({y:v.y,
+                     x:v.x,
+                     z:v.z,
+                     // a random angle
+                     ang:Math.random()*Math.PI*2,
+                     // a random distance
+                     amp:5 + Math.random()*15,
+                     // a random speed between 0.016 and 0.048 radians / frame
+                     speed:0.016 + Math.random()*0.032
+                    });
+  };
   var mat = new THREE.MeshBasicMaterial({
     color:Colors.green,
     transparent:true,
-    opacity:.6,
+    opacity:.8,
+    shading:THREE.FlatShading,
   });
 
   this.mesh = new THREE.Mesh(geom,mat);  //mesh combination of geometry and material
   this.mesh.recieveShadow = true;
 }
+Earth.prototype.moveWaves = function (){
+  
+  // get the vertices
+  var verts = this.mesh.geometry.vertices;
+  var l = verts.length;
+  
+  for (var i=0; i<l; i++){
+    var v = verts[i];
+    
+    // get the data associated to it
+    var vprops = this.waves[i];
+    
+    // update the position of the vertex
+    v.x = vprops.x + Math.cos(vprops.ang)*vprops.amp;
+    v.y = vprops.y + Math.sin(vprops.ang)*vprops.amp;
+    vprops.ang += vprops.speed;
 
+  }
+  this.mesh.geometry.verticesNeedUpdate=true;
+  earth.mesh.rotation.z += .005;
+}
 var earth;
 function createEarth(){
 earth = new Earth();
 earth.mesh.position.y = -600;
 scene.add(earth.mesh);
 }
+var mousePos={x:0, y:0};
 
+// now handle the mousemove event
+
+function handleMouseMove(event) {
+
+  //  converting the mouse position value received 
+  // to a normalized value varying between -1 and 1;
+  // this is the formula for the horizontal axis:
+  
+  var tx = -1 + (event.clientX / WIDTH)*2;
+  var ty = 1 - (event.clientY / HEIGHT)*2;
+  mousePos = {x:tx, y:ty};
+
+}
+
+function updateFidel(){
+  var targetX = normalize(mousePos.x, -1, 1, -100, 100);
+  var targetY = normalize(mousePos.y, -1, 1, 25, 175);
+  fidelO.mesh.position.y = targetY;
+  fidelO.mesh.position.x = targetX;
+}
+
+function normalize(v,vmin,vmax,tmin, tmax){
+
+  var nv = Math.max(Math.min(v,vmax), vmin);
+  var dv = vmax-vmin;
+  var pc = (nv-vmin)/dv;
+  var dt = tmax-tmin;
+  var tv = tmin + (pc*dt);
+  return tv;
+
+}
 function loop(){
+
   sky.mesh.rotation.z += .007;
   earth.mesh.rotation.z += .005;
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
+  updateFidel();
+  earth.moveWaves();
 }
 function init(){
   createScene();//set up the scene
@@ -216,5 +314,7 @@ function init(){
   createEarth();
   createSky();
   loop();
+  document.addEventListener('mousemove', handleMouseMove, false);
+
 }
 window.addEventListener('load', init, false);
