@@ -66,7 +66,8 @@ function createLights(){
   shadowLight.shadow.camera.far = 1000;
   shadowLight.shadow.mapSize.width = 2048;    // define the resolution of the shadow; the higher the better, 
   shadowLight.shadow.mapSize.height = 2048;    // but also the more expensive and less performant
-  
+  ambientLight = new THREE.AmbientLight(0xdc8874, .5);
+  scene.add(ambientLight);
   scene.add(hemisphereLight);    // add lights to the scene to activate
   scene.add(shadowLight);
 }
@@ -282,10 +283,11 @@ function handleMouseMove(event) {
 }
 
 function updateFidel(){
-  var targetX = normalize(mousePos.x, -1, 1, -100, 100);
-  var targetY = normalize(mousePos.y, -1, 1, 25, 175);
-  fidelO.mesh.position.y = targetY;
-  fidelO.mesh.position.x = targetX;
+  var targetY = normalize(mousePos.y,-.75,.75,25, 175);
+  var targetX = normalize(mousePos.x,-.75,.75,-100, 100);
+  fidelO.mesh.position.y += (targetY-fidelO.mesh.position.y)*0.1;
+  fidelO.mesh.rotation.z = (targetY-fidelO.mesh.position.y)*0.0128;
+  fidelO.mesh.rotation.x = (fidelO.mesh.position.y-targetY)*0.0064;
 }
 
 function normalize(v,vmin,vmax,tmin, tmax){
